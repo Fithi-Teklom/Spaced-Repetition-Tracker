@@ -16,12 +16,50 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function renderAgenda(userId) {
     const agenda = getData(userId);
-    
+
     if (!agenda || agenda.length === 0) {
       agendaContainer.textContent = "No agenda found for this user.";
       return;
     }
-    agendaContainer.innerHTML ="";
+    agendaContainer.innerHTML = "";
+
+    const revisionItems = [];
+    for (const topicData of agenda) {
+      for (const date of topicData.revisionDates) {
+        revisionItems.push({
+          topic: topicData.topic,
+          date: date,
+        });
+      }
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const futureItems = revisionItems.filter((item) => {
+      const revisionDate = new Date(item.date);
+      revisionDate.setHours(0, 0, 0, 0);
+
+      return revisionDate >= today;
+    });
+    if (futureItems.length === 0) {
+  agendaContainer.textContent = "No agenda found for this user.";
+  return;
+}
+    futureItems.sort((a, b) => {
+      return new Date(a.date) - new Date(b.date);
+    });
+    for (const item of futureItems) {
+      const p = document.createElement("p");
+      const formattedRevisionDate = new Date(item.date).toLocaleDateString(
+        "en-GB",
+        {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        },
+      );
+      p.textContent = `${item.topic} - ${formattedRevisionDate}`;
+      agendaContainer.appendChild(p);
+    }
   }
 
   userSelect.addEventListener("change", () => {
@@ -47,5 +85,10 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     const revisionDates = calculateRevisionDates(startDate);
     const topicData = { topic, revisionDates };
+
+    addData(userId, [topicData]);
+    renderAgenda(userId);
+    topicInput.value = "";
+    dateInput.value = formattedDate;
   });
 });
