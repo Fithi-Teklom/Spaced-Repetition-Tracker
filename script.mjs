@@ -25,7 +25,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const revisionItems = [];
     for (const topicData of agenda) {
-      for (const date of topicData.revisionDates) {
+      for (const rawDate of topicData.revisionDates) {
+        const date = new Date(rawDate);
         revisionItems.push({
           topic: topicData.topic,
           date: date,
@@ -34,19 +35,17 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
     const futureItems = revisionItems.filter((item) => {
       const revisionDate = new Date(item.date);
       revisionDate.setHours(0, 0, 0, 0);
-
       return revisionDate >= today;
     });
     if (futureItems.length === 0) {
-  agendaContainer.textContent = "No agenda found for this user.";
-  return;
-}
-    futureItems.sort((a, b) => {
-      return new Date(a.date) - new Date(b.date);
-    });
+      agendaContainer.textContent = "No agenda found for this user.";
+      return;
+    }
+    futureItems.sort((a, b) => new Date(a.date) - new Date(b.date));
     for (const item of futureItems) {
       const p = document.createElement("p");
       const formattedRevisionDate = new Date(item.date).toLocaleDateString(
@@ -55,6 +54,7 @@ window.addEventListener("DOMContentLoaded", () => {
           day: "numeric",
           month: "long",
           year: "numeric",
+          timeZone: "UTC",
         },
       );
       p.textContent = `${item.topic} - ${formattedRevisionDate}`;
