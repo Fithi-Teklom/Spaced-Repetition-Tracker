@@ -1,30 +1,38 @@
-export function getUserIds() {
-  return ["1", "2", "3", "4", "5"];
-}
-
 export function calculateRevisionDates(startDate) {
-  const date = new Date(startDate);
+  const [year, month, day] = startDate.split("-").map(Number);
 
-  const oneWeek = new Date(date);
-  oneWeek.setDate(oneWeek.getDate() + 7);
+  const base = new Date(Date.UTC(year, month - 1, day));
 
-  const oneMonth = new Date(date);
-  oneMonth.setMonth(oneMonth.getMonth() + 1);
+  function addDays(d, days) {
+    const copy = new Date(d);
+    copy.setUTCDate(copy.getUTCDate() + days);
+    return copy;
+  }
 
-  const threeMonths = new Date(date);
-  threeMonths.setMonth(threeMonths.getMonth() + 3);
+  function addMonths(d, months) {
+    const copy = new Date(d);
+    const day = copy.getUTCDate();
 
-  const sixMonths = new Date(date);
-  sixMonths.setMonth(sixMonths.getMonth() + 6);
+    copy.setUTCMonth(copy.getUTCMonth() + months);
 
-  const oneYear = new Date(date);
-  oneYear.setFullYear(oneYear.getFullYear() + 1);
+    if (copy.getUTCDate() !== day) {
+      copy.setUTCDate(0);
+    }
+
+    return copy;
+  }
+
+  function addYears(d, years) {
+    const copy = new Date(d);
+    copy.setUTCFullYear(copy.getUTCFullYear() + years);
+    return copy;
+  }
 
   return [
-    oneWeek,
-    oneMonth,
-    threeMonths,
-    sixMonths,
-    oneYear,
+    addDays(base, 7),
+    addMonths(base, 1),
+    addMonths(base, 3),
+    addMonths(base, 6),
+    addYears(base, 1),
   ];
 }
